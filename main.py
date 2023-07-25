@@ -2,6 +2,7 @@ available_tables = ['Table 1', 'Table 2', 'Table 3', 'Table 4', 'Table 5', 'Tabl
 table_assignments = {}
 table_customers = {}
 table_orders = {}
+table_bills = {}
 
 def read_login_credentials(file_name):
     credentials = {}
@@ -17,8 +18,6 @@ def validate_login(credentials, username, password):
     return False
 
 def assign_table(username, table):
-    print("Assign Table")
-    # Implement the logic to assign a table to a customer
     available_tables.remove(table)
     table_assignments[username] = table
 
@@ -29,15 +28,11 @@ def assign_table(username, table):
 
     num_customers = int(input("Enter the number of customers for this table: "))
     table_customers[table] = num_customers
-    print('GGGGGGGGGGGGGGG')
     print(table_customers)
     print(f"{table} has {num_customers} customers.")
 
 def show_assigned_tables(username):
     tables = [table for table, waiter in table_assignments.items() if waiter == username]
-   # print(f"Tables assigned to {username}:")
-   # for table in tables:
-   #     print(table)
 
 def change_customers(username):
     show_assigned_tables(username)
@@ -51,24 +46,44 @@ def change_customers(username):
         print(f"{table} is not assigned to {username}.")
 
 def add_to_order(username):
-    print("Add to Order")
-    # Implement the logic to add items to the order
-
     table = table_assignments.get(username)
     if table:
-        order = input(f"Enter the order for {table}: ")
+        order = input("Enter the order: ")
         table_orders[table].append(order)
         print(f"Order '{order}' added for table {table}.")
     else:
         print(f"{username} is not assigned to any table.")
 
-def prepare_bill():
-    print("Prepare Bill")
-    # Implement the logic to prepare the bill for the table
+def prepare_bill(username):
+    table = table_assignments.get(username)
+    if table:
+        if len(table_orders[table]) > 0:
+            total_bill = len(table_orders[table]) * 10  # Assuming each order costs $10
+            table_bills[table] = total_bill
+            print(f"Bill for table {table}:")
+            for order in table_orders[table]:
+                print(order)
+            print(f"Total bill: ${total_bill}")
+        else:
+            print(f"No orders taken for table {table}. Please add orders first.")
+    else:
+        print(f"{username} is not assigned to any table.")
 
-def complete_sale():
-    print("Complete Sale")
-    # Implement the logic to complete the sale and finalize the transaction
+def complete_sale(username):
+    table = table_assignments.get(username)
+    if table:
+        if table_bills[table] > 0:
+            print(f"Sale completed for table {table}.")
+            # Reset table data
+            del table_assignments[username]
+            del table_customers[table]
+            del table_orders[table]
+            del table_bills[table]
+            available_tables.append(table)
+        else:
+            print(f"No bill prepared for table {table}. Please generate the bill first.")
+    else:
+        print(f"{username} is not assigned to any table.")
 
 def cash_up():
     print("Cash Up")
@@ -90,8 +105,6 @@ def main():
 
     if validate_login(credentials, username, password):
         print("Login successful!")
-
-        # The following code displays the menu
         
         while True:
         # Display the menu options
@@ -122,7 +135,7 @@ def main():
             elif choice == "3":
                 add_to_order(username)
             elif choice == "4":
-                prepare_bill()
+                prepare_bill(username)
             elif choice == "5":
                 complete_sale()
             elif choice == "6":
